@@ -2,6 +2,7 @@ from flask import Flask, render_template, request
 import pandas as pd
 import numpy as np
 import joblib
+import os  # ✅ Added to access environment variables for port
 
 app = Flask(__name__)
 
@@ -30,7 +31,7 @@ def predict():
 
     return "No file uploaded", 400
 
+# ✅ Required for Render: bind to 0.0.0.0 and use PORT env variable
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
-
-
+    port = int(os.environ.get('PORT', 10000))  # Render provides PORT
+    app.run(host='0.0.0.0', port=port)
