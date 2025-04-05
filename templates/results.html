@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prediction Results</title>
+</head>
+<body>
+    <h2>Prediction Output</h2>
+    {% if prediction %}
+        <p><strong>Prediction:</strong> {{ prediction }}</p>
+    {% endif %}
+    {% for table in tables %}
+        {{ table|safe }}
+    {% endfor %}
+</body>
+</html>
