@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, request
 import pandas as pd
 import numpy as np
@@ -7,9 +8,14 @@ from tensorflow.keras.models import load_model
 
 app = Flask(__name__)
 
-# Load scaler and set threshold globally
-scaler = joblib.load("scaler.pkl")
-threshold = 0.041812  # Update if needed
+# Load the scaler
+try:
+    scaler = joblib.load("scaler.pkl")
+except FileNotFoundError:
+    scaler = None
+    print("Error: scaler.pkl not found.")
+
+threshold = 0.041812  # Adjust as needed
 
 @app.route('/')
 def index():
@@ -17,9 +23,12 @@ def index():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    model = load_model("autoencoder_model.h5", compile=False)
-
     try:
+        if scaler is None:
+            return "Scaler file not found on server.", 500
+
+        model = load_model("autoencoder_model.h5", compile=False)
+
         if 'csv_file' not in request.files:
             return "No file part", 400
 
@@ -28,7 +37,6 @@ def predict():
             return "No selected file", 400
 
         df = pd.read_csv(file)
-
         if df.empty:
             return "Uploaded CSV is empty or invalid", 400
 
@@ -40,12 +48,12 @@ def predict():
 
         return render_template('index.html', tables=[df.to_html(classes='data')], results=results)
 
+    except FileNotFoundError as fnf_error:
+        return f"Model file not found: {str(fnf_error)}", 500
     except Exception as e:
         print("ERROR:", e)
         return f"An error occurred: {str(e)}", 500
 
-# For local dev and Render deployment
 if __name__ == '__main__':
-    import os
-    port = int(os.environ.get('PORT', 10000))  # Render sets this dynamically
-    app.run(host='0.0.0.0', port=port)
+    port = int(os.environ.get('PORT', 10000))
+    app.run(host='0.0.0.0', port=port, debug=True)
