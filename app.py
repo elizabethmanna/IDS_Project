@@ -3,10 +3,11 @@ import pandas as pd
 import numpy as np
 import joblib
 import os
+from tensorflow.keras.models import load_model
 
 app = Flask(__name__)
 
-# Load the scaler globally
+# Load scaler and set threshold globally
 scaler = joblib.load("scaler.pkl")
 threshold = 0.041812  # Update if needed
 
@@ -16,7 +17,6 @@ def index():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    from tensorflow.keras.models import load_model
     model = load_model("autoencoder_model.h5", compile=False)
 
     try:
@@ -29,7 +29,6 @@ def predict():
 
         df = pd.read_csv(file)
 
-        # Optional: Check if DataFrame is empty
         if df.empty:
             return "Uploaded CSV is empty or invalid", 400
 
@@ -42,11 +41,10 @@ def predict():
         return render_template('index.html', tables=[df.to_html(classes='data')], results=results)
 
     except Exception as e:
-        # Print error to console
         print("ERROR:", e)
         return f"An error occurred: {str(e)}", 500
 
-# For local dev
+# For local dev and Render deployment
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 10000))
+    port = int(os.environ.get("PORT", 10000))  # Default to 10000 for local
     app.run(host='0.0.0.0', port=port, debug=True)
