@@ -2,11 +2,11 @@ from flask import Flask, render_template, request
 import pandas as pd
 import numpy as np
 import joblib
-import os  # ✅ Added to access environment variables for port
+import os  # ✅ Needed for environment variable PORT access
 
 app = Flask(__name__)
 
-# Load only the scaler and threshold globally
+# Load scaler and threshold globally
 scaler = joblib.load("scaler.pkl")
 threshold = 0.041812  # Adjust if needed
 
@@ -16,7 +16,7 @@ def index():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    # Lazy load the model here instead of globally
+    # Lazy load the model to save memory
     from tensorflow.keras.models import load_model
     model = load_model("autoencoder_model.h5", compile=False)
 
@@ -31,8 +31,7 @@ def predict():
 
     return "No file uploaded", 400
 
-
+# ✅ Ensure correct host and port for Render deployment
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))  # default to 5000 locally
-    app.run(host='127.0.0.1', port=port, debug=True)
-
+    port = int(os.environ.get("PORT", 10000))  # Render provides a dynamic port
+    app.run(host='0.0.0.0', port=port)
