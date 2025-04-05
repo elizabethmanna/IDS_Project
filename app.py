@@ -46,5 +46,6 @@ def predict():
 
 # For local dev and Render deployment
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))  # Default to 10000 for local
-    app.run(host='0.0.0.0', port=port, debug=True)
+    import os
+    port = int(os.environ.get('PORT', 10000))  # Render sets this dynamically
+    app.run(host='0.0.0.0', port=port)
